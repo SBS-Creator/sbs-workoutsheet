@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="ja">
-<<head>
+<head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="SBS" />
 
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -13,7 +14,10 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
 
   <title>sbs-worksheet（自社範囲）</title>
+
   <style>
+    * { box-sizing: border-box; }
+
     :root {
       --bg: #f6f7f9;
       --card: #ffffff;
@@ -28,8 +32,12 @@
       --radius: 16px;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -37,6 +45,7 @@
     }
 
     .wrap {
+      width: 100%;
       max-width: 860px;
       margin: 0 auto;
     }
@@ -62,6 +71,7 @@
       box-shadow: var(--shadow);
       padding: 18px;
       margin-bottom: 14px;
+      overflow: hidden;
     }
 
     .section-title {
@@ -74,12 +84,14 @@
 
     .row {
       display: grid;
-      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 18px;
+      align-items: start;
     }
 
     .row > div {
       min-width: 0;
+      width: 100%;
     }
 
     label {
@@ -88,12 +100,15 @@
       font-size: 13px;
       font-weight: 700;
       color: #374151;
+      line-height: 1.5;
     }
 
     input,
     select,
     textarea {
+      display: block;
       width: 100%;
+      max-width: 100%;
       padding: 12px 13px;
       border: 1px solid #d1d5db;
       border-radius: 12px;
@@ -215,7 +230,7 @@
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
       margin-top: 14px;
     }
@@ -285,6 +300,8 @@
     .detail-name {
       color: #333;
       white-space: pre-wrap;
+      flex: 1;
+      min-width: 0;
     }
 
     .detail-value {
@@ -292,6 +309,7 @@
       font-weight: 700;
       text-align: right;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .sub-line {
@@ -375,6 +393,7 @@
 
     <div class="card">
       <div class="section-title">導入条件</div>
+
       <div class="row">
         <div>
           <label for="server_type">サーバー機種</label>
@@ -405,23 +424,28 @@
       <div class="divider"></div>
 
       <div class="section-title">機器台数</div>
+
       <div class="row">
         <div>
           <label for="qty_bedside">ベッドサイド端末 台数</label>
           <input id="qty_bedside" type="number" inputmode="numeric" placeholder="例：20" />
         </div>
+
         <div>
           <label for="qty_sleep">眠りSCAN 台数</label>
           <input id="qty_sleep" type="number" inputmode="numeric" placeholder="例：20" />
         </div>
+
         <div>
           <label for="qty_wifi">Wi-Fiベッドナビ 台数</label>
           <input id="qty_wifi" type="number" inputmode="numeric" placeholder="例：20" />
         </div>
+
         <div>
           <label for="qty_camera">ネットワークカメラ 台数</label>
           <input id="qty_camera" type="number" inputmode="numeric" placeholder="例：4" />
         </div>
+
         <div>
           <label for="qty_mobile">モバイル端末 台数</label>
           <input id="qty_mobile" type="number" inputmode="numeric" placeholder="例：10" />
@@ -493,402 +517,402 @@
     </div>
   </div>
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzm8ZfUAp7npJQPQ99WGkxUGYwdsNzVVrDsiVgh8_XTudd40caeu4U4sVzIsFd8klEp/exec";
-  const STORAGE_KEY = "sbs_worksheet_v10";
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbytWUFZxEH1984ckdNRYaS-2eLuIfJyR9vJTDtvnMq5tzH5RIH7jiNtDz5gAUArXb0E/exec";
+    const STORAGE_KEY = "sbs_worksheet_v10";
 
-  const FIELD_IDS = [
-    "pin",
-    "hospital_name",
-    "owner_name",
-    "server_type",
-    "bed_count",
-    "ward_count",
-    "qty_station",
-    "qty_bedside",
-    "qty_sleep",
-    "qty_wifi",
-    "qty_camera",
-    "qty_mobile"
-  ];
+    const FIELD_IDS = [
+      "pin",
+      "hospital_name",
+      "owner_name",
+      "server_type",
+      "bed_count",
+      "ward_count",
+      "qty_station",
+      "qty_bedside",
+      "qty_sleep",
+      "qty_wifi",
+      "qty_camera",
+      "qty_mobile"
+    ];
 
-  function yen(n) {
-    const x = Number(n || 0);
-    return x.toLocaleString("ja-JP") + " 円";
-  }
-
-  function toNum(v) {
-    const x = Number(v);
-    return Number.isFinite(x) ? x : 0;
-  }
-
-  function v(id) {
-    return String(document.getElementById(id).value || "0");
-  }
-
-  function s(id) {
-    return String(document.getElementById(id).value || "").trim();
-  }
-
-  function setStatus(text) {
-    document.getElementById("status").textContent = text;
-  }
-
-  function saveForm() {
-    const data = {};
-    for (const id of FIELD_IDS) {
-      data[id] = document.getElementById(id).value || "";
+    function yen(n) {
+      const x = Number(n || 0);
+      return x.toLocaleString("ja-JP") + " 円";
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setStatus("入力内容を保存しました。");
-  }
 
-  function loadForm() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
+    function toNum(v) {
+      const x = Number(v);
+      return Number.isFinite(x) ? x : 0;
+    }
+
+    function v(id) {
+      return String(document.getElementById(id).value || "0");
+    }
+
+    function s(id) {
+      return String(document.getElementById(id).value || "").trim();
+    }
+
+    function setStatus(text) {
+      document.getElementById("status").textContent = text;
+    }
+
+    function saveForm() {
+      const data = {};
       for (const id of FIELD_IDS) {
-        if (data[id] !== undefined) {
-          document.getElementById(id).value = data[id];
+        data[id] = document.getElementById(id).value || "";
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setStatus("入力内容を保存しました。");
+    }
+
+    function loadForm() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        for (const id of FIELD_IDS) {
+          if (data[id] !== undefined) {
+            document.getElementById(id).value = data[id];
+          }
         }
+        setStatus("前回の入力内容を読み込みました。");
+      } catch (e) {
+        setStatus("保存データの読み込みに失敗しました。");
       }
-      setStatus("前回の入力内容を読み込みました。");
-    } catch (e) {
-      setStatus("保存データの読み込みに失敗しました。");
     }
-  }
 
-  function jsonp(url, callbackName, timeoutMs = 20000) {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      const timer = setTimeout(() => {
-        cleanup();
-        reject(new Error("JSONP timeout"));
-      }, timeoutMs);
+    function jsonp(url, callbackName, timeoutMs = 20000) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error("JSONP timeout"));
+        }, timeoutMs);
 
-      function cleanup() {
-        clearTimeout(timer);
-        if (script.parentNode) script.parentNode.removeChild(script);
-        try {
-          delete window[callbackName];
-        } catch (e) {
-          window[callbackName] = undefined;
+        function cleanup() {
+          clearTimeout(timer);
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] = undefined;
+          }
         }
-      }
 
-      window[callbackName] = (data) => {
-        cleanup();
-        resolve(data);
-      };
+        window[callbackName] = (data) => {
+          cleanup();
+          resolve(data);
+        };
 
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("JSONP script load error"));
-      };
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("JSONP script load error"));
+        };
 
-      script.src = url;
-      document.body.appendChild(script);
-    });
-  }
-
-  function resetResultView() {
-    document.getElementById("out").textContent = "-";
-    document.getElementById("unit-price").textContent = "-";
-    document.getElementById("hw-total").textContent = "-";
-    document.getElementById("server-cost").textContent = "-";
-    document.getElementById("build-cost").textContent = "-";
-    document.getElementById("server-meta").textContent = "まだ計算されていません。";
-    document.getElementById("detail-box").style.display = "none";
-    document.getElementById("detail-lines").innerHTML = "";
-    document.getElementById("hw-breakdown-box").style.display = "none";
-    document.getElementById("hw-breakdown-lines").innerHTML = "";
-    document.getElementById("note").style.display = "none";
-    document.getElementById("note").textContent = "";
-    document.getElementById("mailText").value = "";
-  }
-
-  function applyServerTypeRestriction() {
-    const bedsideQty = toNum(document.getElementById("qty_bedside").value || 0);
-    const serverSelect = document.getElementById("server_type");
-    const currentValue = serverSelect.value;
-
-    const optionPc = serverSelect.querySelector('option[value="pc_builtin"]');
-    const optionTower = serverSelect.querySelector('option[value="tower"]');
-    const optionRack = serverSelect.querySelector('option[value="rack"]');
-    const note = document.getElementById("server-rule-note");
-
-    if (bedsideQty > 0) {
-      if (optionPc) optionPc.disabled = true;
-      if (optionTower) optionTower.disabled = true;
-      if (optionRack) optionRack.disabled = false;
-      if (note) note.style.display = "block";
-
-      if (currentValue && currentValue !== "rack") {
-        serverSelect.value = "rack";
-        setStatus("ベッドサイド端末ありの場合、サーバー機種はラックマウント型サーバーのみ選択できます。");
-        saveForm();
-      }
-    } else {
-      if (optionPc) optionPc.disabled = false;
-      if (optionTower) optionTower.disabled = false;
-      if (optionRack) optionRack.disabled = false;
-      if (note) note.style.display = "none";
-    }
-  }
-
-  function renderDetails(data) {
-    const box = document.getElementById("detail-box");
-    const container = document.getElementById("detail-lines");
-    const lines = [];
-
-    if (data && data.server_type_label) {
-      lines.push({
-        name: `サーバー（${data.server_type_label}）　1式`,
-        amount: Number(data.server_cost || 0)
+        script.src = url;
+        document.body.appendChild(script);
       });
     }
 
-    const rows = Array.isArray(data && data.hardware_breakdown)
-      ? data.hardware_breakdown
-      : [];
-
-    for (const row of rows) {
-      lines.push({
-        name: `${row.label}　${toNum(row.qty)}台`,
-        amount: toNum(row.amount)
-      });
+    function resetResultView() {
+      document.getElementById("out").textContent = "-";
+      document.getElementById("unit-price").textContent = "-";
+      document.getElementById("hw-total").textContent = "-";
+      document.getElementById("server-cost").textContent = "-";
+      document.getElementById("build-cost").textContent = "-";
+      document.getElementById("server-meta").textContent = "まだ計算されていません。";
+      document.getElementById("detail-box").style.display = "none";
+      document.getElementById("detail-lines").innerHTML = "";
+      document.getElementById("hw-breakdown-box").style.display = "none";
+      document.getElementById("hw-breakdown-lines").innerHTML = "";
+      document.getElementById("note").style.display = "none";
+      document.getElementById("note").textContent = "";
+      document.getElementById("mailText").value = "";
     }
 
-    if (lines.length === 0) {
-      box.style.display = "none";
-      container.innerHTML = "";
-      return;
-    }
+    function applyServerTypeRestriction() {
+      const bedsideQty = toNum(document.getElementById("qty_bedside").value || 0);
+      const serverSelect = document.getElementById("server_type");
+      const currentValue = serverSelect.value;
 
-    let html = "";
-    for (const item of lines) {
-      html += `
-        <div class="detail-line">
-          <div class="detail-name">${item.name}</div>
-          <div class="detail-value">${yen(item.amount)}</div>
-        </div>
-      `;
-    }
+      const optionPc = serverSelect.querySelector('option[value="pc_builtin"]');
+      const optionTower = serverSelect.querySelector('option[value="tower"]');
+      const optionRack = serverSelect.querySelector('option[value="rack"]');
+      const note = document.getElementById("server-rule-note");
 
-    container.innerHTML = html;
-    box.style.display = "block";
-  }
+      if (bedsideQty > 0) {
+        if (optionPc) optionPc.disabled = true;
+        if (optionTower) optionTower.disabled = true;
+        if (optionRack) optionRack.disabled = false;
+        if (note) note.style.display = "block";
 
-  function renderHardwareBreakdown(data) {
-    const box = document.getElementById("hw-breakdown-box");
-    const container = document.getElementById("hw-breakdown-lines");
-
-    const rows = Array.isArray(data && data.hardware_breakdown)
-      ? data.hardware_breakdown
-      : [];
-
-    if (!rows.length) {
-      box.style.display = "none";
-      container.innerHTML = "";
-      return;
-    }
-
-    const total = rows.reduce((sum, row) => sum + toNum(row.amount), 0);
-
-    let html = "";
-    for (const row of rows) {
-      html += `
-        <div class="detail-line">
-          <div class="detail-name">
-            ${row.label}
-            <span class="sub-line">数量：${toNum(row.qty)}台 ／ 単価：${yen(row.unit_price)}</span>
-          </div>
-          <div class="detail-value">${yen(row.amount)}</div>
-        </div>
-      `;
-    }
-
-    html += `
-      <div class="detail-line">
-        <div class="detail-name"><strong>機器合計</strong></div>
-        <div class="detail-value"><strong>${yen(total)}</strong></div>
-      </div>
-    `;
-
-    container.innerHTML = html;
-    box.style.display = "block";
-  }
-
-  function buildMailText(data) {
-    const hospital = s("hospital_name");
-    const owner = s("owner_name");
-    const server = data.server_type_label || "";
-
-    const bed = v("bed_count");
-    const ward = v("ward_count");
-
-    let text = "";
-    text += "スマートベッドシステム 概算\n\n";
-
-    if (hospital) text += "病院名：" + hospital + "\n";
-    if (owner) text += "担当者：" + owner + "\n";
-
-    text += "\n■導入条件\n";
-    text += "サーバー：" + server + "\n";
-    text += "病床数：" + bed + "床\n";
-    text += "病棟数：" + ward + "病棟\n";
-
-    text += "\n■機器構成\n";
-    if (server) {
-      text += "サーバー：" + server + " 1式\n";
-    }
-
-    const rows = Array.isArray(data && data.hardware_breakdown)
-      ? data.hardware_breakdown
-      : [];
-
-    for (const row of rows) {
-      text += `${row.label}：${toNum(row.qty)}台\n`;
-    }
-
-    text += "\n■概算金額\n";
-    text += "機器合計：" + yen(data.hw_total) + "\n";
-    text += "サーバー費：" + yen(data.server_cost) + "\n";
-    text += "構築費：" + yen(data.build_cost) + "\n";
-    text += "総額：" + (data.total_yen || yen(data.total)) + "\n";
-    text += "1床あたり：" + (data.price_per_bed_yen || yen(data.price_per_bed)) + "\n";
-
-    document.getElementById("mailText").value = text;
-  }
-
-  async function copyMailText() {
-    const text = document.getElementById("mailText").value;
-    if (!text.trim()) {
-      setStatus("先に計算を実行してください。");
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus("メール用文章をコピーしました。");
-    } catch (e) {
-      setStatus("コピーに失敗しました。手動でコピーしてください。");
-    }
-  }
-
-  async function calc() {
-    try {
-      setStatus("計算中です…");
-
-      const st = s("server_type");
-      const bedsideQty = toNum(v("qty_bedside"));
-
-      if (!st) {
-        resetResultView();
-        document.getElementById("out").textContent = "エラー";
-        document.getElementById("server-meta").textContent = "サーバー機種を選択してください。";
-        setStatus("入力内容を確認してください。");
-        return;
-      }
-
-      if (bedsideQty > 0 && st !== "rack") {
-        resetResultView();
-        document.getElementById("out").textContent = "エラー";
-        document.getElementById("server-meta").textContent = "ベッドサイド端末ありの場合、ラックマウント型サーバーを選択してください。";
-        setStatus("入力内容を確認してください。");
-        return;
-      }
-
-      saveForm();
-
-      const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-
-      const params = new URLSearchParams({
-        callback: cb,
-        pin: s("pin"),
-        hospital_name: s("hospital_name"),
-        owner_name: s("owner_name"),
-        server_type: st,
-        qty_bedside: v("qty_bedside"),
-        qty_sleep: v("qty_sleep"),
-        qty_wifi: v("qty_wifi"),
-        qty_station: v("qty_station"),
-        qty_camera: v("qty_camera"),
-        qty_mobile: v("qty_mobile"),
-        bed_count: v("bed_count"),
-        ward_count: v("ward_count"),
-        _: String(Date.now())
-      });
-
-      const url = API_URL + "?" + params.toString();
-      const data = await jsonp(url, cb);
-
-      if (!data.ok) {
-        resetResultView();
-        document.getElementById("out").textContent = "エラー";
-        document.getElementById("server-meta").textContent = data.error || "失敗しました。";
-        setStatus("エラーが発生しました。");
-        return;
-      }
-
-      document.getElementById("out").textContent = data.total_yen || yen(data.total);
-      document.getElementById("unit-price").textContent = data.price_per_bed_yen || yen(data.price_per_bed);
-      document.getElementById("hw-total").textContent = yen(data.hw_total);
-      document.getElementById("server-cost").textContent = yen(data.server_cost);
-      document.getElementById("build-cost").textContent = yen(data.build_cost);
-
-      const serverLabel = data.server_type_label || "-";
-      const serverTier = data.server_tier || "-";
-      const buildTier = data.build_tier || "-";
-      const stationUsed = toNum(data.station_qty_used || 0);
-
-      let metaText =
-        `サーバー機種：${serverLabel}\n` +
-        `サーバーTier：${serverTier}\n` +
-        `構築Tier：${buildTier}\n` +
-        `機器構成上のステーション端末数：${stationUsed} 台`;
-
-      if (data.server_description) {
-        metaText += `\n\n${data.server_description}`;
-      }
-
-      document.getElementById("server-meta").textContent = metaText;
-
-      if (data.note_text) {
-        document.getElementById("note").textContent = data.note_text;
-        document.getElementById("note").style.display = "block";
+        if (currentValue && currentValue !== "rack") {
+          serverSelect.value = "rack";
+          setStatus("ベッドサイド端末ありの場合、サーバー機種はラックマウント型サーバーのみ選択できます。");
+          saveForm();
+        }
       } else {
-        document.getElementById("note").style.display = "none";
-        document.getElementById("note").textContent = "";
+        if (optionPc) optionPc.disabled = false;
+        if (optionTower) optionTower.disabled = false;
+        if (optionRack) optionRack.disabled = false;
+        if (note) note.style.display = "none";
+      }
+    }
+
+    function renderDetails(data) {
+      const box = document.getElementById("detail-box");
+      const container = document.getElementById("detail-lines");
+      const lines = [];
+
+      if (data && data.server_type_label) {
+        lines.push({
+          name: `サーバー（${data.server_type_label}）　1式`,
+          amount: Number(data.server_cost || 0)
+        });
       }
 
-      renderDetails(data);
-      renderHardwareBreakdown(data);
-      buildMailText(data);
-      setStatus("計算が完了しました。");
-    } catch (e) {
-      resetResultView();
-      document.getElementById("out").textContent = "通信エラー";
-      document.getElementById("server-meta").textContent = String(e);
-      setStatus("通信に失敗しました。");
+      const rows = Array.isArray(data && data.hardware_breakdown)
+        ? data.hardware_breakdown
+        : [];
+
+      for (const row of rows) {
+        lines.push({
+          name: `${row.label}　${toNum(row.qty)}台`,
+          amount: toNum(row.amount)
+        });
+      }
+
+      if (lines.length === 0) {
+        box.style.display = "none";
+        container.innerHTML = "";
+        return;
+      }
+
+      let html = "";
+      for (const item of lines) {
+        html += `
+          <div class="detail-line">
+            <div class="detail-name">${item.name}</div>
+            <div class="detail-value">${yen(item.amount)}</div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      box.style.display = "block";
     }
-  }
 
-  document.getElementById("calc").addEventListener("click", calc);
-  document.getElementById("copyMail").addEventListener("click", copyMailText);
+    function renderHardwareBreakdown(data) {
+      const box = document.getElementById("hw-breakdown-box");
+      const container = document.getElementById("hw-breakdown-lines");
 
-  for (const id of FIELD_IDS) {
-    document.getElementById(id).addEventListener("input", saveForm);
-    document.getElementById(id).addEventListener("change", saveForm);
-  }
+      const rows = Array.isArray(data && data.hardware_breakdown)
+        ? data.hardware_breakdown
+        : [];
 
-  document.getElementById("qty_bedside").addEventListener("input", applyServerTypeRestriction);
-  document.getElementById("qty_bedside").addEventListener("change", applyServerTypeRestriction);
-  document.getElementById("server_type").addEventListener("change", applyServerTypeRestriction);
+      if (!rows.length) {
+        box.style.display = "none";
+        container.innerHTML = "";
+        return;
+      }
 
-  loadForm();
-  applyServerTypeRestriction();
-</script>
+      const total = rows.reduce((sum, row) => sum + toNum(row.amount), 0);
+
+      let html = "";
+      for (const row of rows) {
+        html += `
+          <div class="detail-line">
+            <div class="detail-name">
+              ${row.label}
+              <span class="sub-line">数量：${toNum(row.qty)}台 ／ 単価：${yen(row.unit_price)}</span>
+            </div>
+            <div class="detail-value">${yen(row.amount)}</div>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="detail-line">
+          <div class="detail-name"><strong>機器合計</strong></div>
+          <div class="detail-value"><strong>${yen(total)}</strong></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      box.style.display = "block";
+    }
+
+    function buildMailText(data) {
+      const hospital = s("hospital_name");
+      const owner = s("owner_name");
+      const server = data.server_type_label || "";
+
+      const bed = v("bed_count");
+      const ward = v("ward_count");
+
+      let text = "";
+      text += "スマートベッドシステム 概算\n\n";
+
+      if (hospital) text += "病院名：" + hospital + "\n";
+      if (owner) text += "担当者：" + owner + "\n";
+
+      text += "\n■導入条件\n";
+      text += "サーバー：" + server + "\n";
+      text += "病床数：" + bed + "床\n";
+      text += "病棟数：" + ward + "病棟\n";
+
+      text += "\n■機器構成\n";
+      if (server) {
+        text += "サーバー：" + server + " 1式\n";
+      }
+
+      const rows = Array.isArray(data && data.hardware_breakdown)
+        ? data.hardware_breakdown
+        : [];
+
+      for (const row of rows) {
+        text += `${row.label}：${toNum(row.qty)}台\n`;
+      }
+
+      text += "\n■概算金額\n";
+      text += "機器合計：" + yen(data.hw_total) + "\n";
+      text += "サーバー費：" + yen(data.server_cost) + "\n";
+      text += "構築費：" + yen(data.build_cost) + "\n";
+      text += "総額：" + (data.total_yen || yen(data.total)) + "\n";
+      text += "1床あたり：" + (data.price_per_bed_yen || yen(data.price_per_bed)) + "\n";
+
+      document.getElementById("mailText").value = text;
+    }
+
+    async function copyMailText() {
+      const text = document.getElementById("mailText").value;
+      if (!text.trim()) {
+        setStatus("先に計算を実行してください。");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("メール用文章をコピーしました。");
+      } catch (e) {
+        setStatus("コピーに失敗しました。手動でコピーしてください。");
+      }
+    }
+
+    async function calc() {
+      try {
+        setStatus("計算中です…");
+
+        const st = s("server_type");
+        const bedsideQty = toNum(v("qty_bedside"));
+
+        if (!st) {
+          resetResultView();
+          document.getElementById("out").textContent = "エラー";
+          document.getElementById("server-meta").textContent = "サーバー機種を選択してください。";
+          setStatus("入力内容を確認してください。");
+          return;
+        }
+
+        if (bedsideQty > 0 && st !== "rack") {
+          resetResultView();
+          document.getElementById("out").textContent = "エラー";
+          document.getElementById("server-meta").textContent = "ベッドサイド端末ありの場合、ラックマウント型サーバーを選択してください。";
+          setStatus("入力内容を確認してください。");
+          return;
+        }
+
+        saveForm();
+
+        const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+
+        const params = new URLSearchParams({
+          callback: cb,
+          pin: s("pin"),
+          hospital_name: s("hospital_name"),
+          owner_name: s("owner_name"),
+          server_type: st,
+          qty_bedside: v("qty_bedside"),
+          qty_sleep: v("qty_sleep"),
+          qty_wifi: v("qty_wifi"),
+          qty_station: v("qty_station"),
+          qty_camera: v("qty_camera"),
+          qty_mobile: v("qty_mobile"),
+          bed_count: v("bed_count"),
+          ward_count: v("ward_count"),
+          _: String(Date.now())
+        });
+
+        const url = API_URL + "?" + params.toString();
+        const data = await jsonp(url, cb);
+
+        if (!data.ok) {
+          resetResultView();
+          document.getElementById("out").textContent = "エラー";
+          document.getElementById("server-meta").textContent = data.error || "失敗しました。";
+          setStatus("エラーが発生しました。");
+          return;
+        }
+
+        document.getElementById("out").textContent = data.total_yen || yen(data.total);
+        document.getElementById("unit-price").textContent = data.price_per_bed_yen || yen(data.price_per_bed);
+        document.getElementById("hw-total").textContent = yen(data.hw_total);
+        document.getElementById("server-cost").textContent = yen(data.server_cost);
+        document.getElementById("build-cost").textContent = yen(data.build_cost);
+
+        const serverLabel = data.server_type_label || "-";
+        const serverTier = data.server_tier || "-";
+        const buildTier = data.build_tier || "-";
+        const stationUsed = toNum(data.station_qty_used || 0);
+
+        let metaText =
+          `サーバー機種：${serverLabel}\n` +
+          `サーバーTier：${serverTier}\n` +
+          `構築Tier：${buildTier}\n` +
+          `機器構成上のステーション端末数：${stationUsed} 台`;
+
+        if (data.server_description) {
+          metaText += `\n\n${data.server_description}`;
+        }
+
+        document.getElementById("server-meta").textContent = metaText;
+
+        if (data.note_text) {
+          document.getElementById("note").textContent = data.note_text;
+          document.getElementById("note").style.display = "block";
+        } else {
+          document.getElementById("note").style.display = "none";
+          document.getElementById("note").textContent = "";
+        }
+
+        renderDetails(data);
+        renderHardwareBreakdown(data);
+        buildMailText(data);
+        setStatus("計算が完了しました。");
+      } catch (e) {
+        resetResultView();
+        document.getElementById("out").textContent = "通信エラー";
+        document.getElementById("server-meta").textContent = String(e);
+        setStatus("通信に失敗しました。");
+      }
+    }
+
+    document.getElementById("calc").addEventListener("click", calc);
+    document.getElementById("copyMail").addEventListener("click", copyMailText);
+
+    for (const id of FIELD_IDS) {
+      document.getElementById(id).addEventListener("input", saveForm);
+      document.getElementById(id).addEventListener("change", saveForm);
+    }
+
+    document.getElementById("qty_bedside").addEventListener("input", applyServerTypeRestriction);
+    document.getElementById("qty_bedside").addEventListener("change", applyServerTypeRestriction);
+    document.getElementById("server_type").addEventListener("change", applyServerTypeRestriction);
+
+    loadForm();
+    applyServerTypeRestriction();
+  </script>
 </body>
 </html>
